@@ -1,0 +1,28 @@
+:root {
+	font-size: 16px;	
+	font-family: Helvetica;
+}
+
+body {
+	display: grid;
+	justify-items: center;
+}
+
+main {
+	max-width: 70ch;
+}
+
+h1 {
+	font-size: 2rem;
+	text-align: center;
+}
+
+label {
+	font-size: 1.2rem;
+	font-weight: 500;
+}
+
+p[data-agregar], p[data-primero], p[data-ultimo] {
+	cursor: pointer;
+}
+
