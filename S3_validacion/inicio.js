@@ -42,6 +42,7 @@ function initFormularioRFC() {
         if(respuesta.estado === "error") {
             spanRFC.innerText = respuesta.msg;
             spanRFC.style.color = "red";
+            inputRFC.style.borderColor = "red";
         } else {
             console.log(respuesta)
         }
@@ -55,17 +56,20 @@ function initFormularioRFC() {
         if (valor === "") {
             spanRFC.innerText = "Debes completar este campo";
             spanRFC.style.color = "red";
+            inputRFC.style.borderColor = "red";
             return false
         }
 
         if (reRFC.test(valor) === false) {
             spanRFC.innerText = "El RFC no es válido";
+            inputRFC.style.borderColor = "red";
             spanRFC.style.color = "red";
             return false
         }
         
         spanRFC.innerText = "";
         spanRFC.style.color = "";
+            inputRFC.style.borderColor = "";
         return true 
     }
 
