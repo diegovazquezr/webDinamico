@@ -6,6 +6,8 @@
 body {
 	display: grid;
 	justify-items: center;
+	/* background-color: black;
+	color: whitesmoke; */
 }
 
 main {
@@ -26,3 +28,10 @@ p[data-agregar], p[data-primero], p[data-ultimo] {
 	cursor: pointer;
 }
 
+input[type="text"] {
+	display: block;
+}
+
+.msg {
+	display: block;
+}

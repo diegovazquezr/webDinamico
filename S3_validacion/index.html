@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<link rel="stylesheet" href="style.css">
-	</head>
-	<body>
-		<main>
-			<h1>Expresiones Regulares</h1>
 
-			<form>
-				<label for="rfc">RFC</label>
-				<input id="rfc" type="text">
-				<button type="submit" data-accion="validar">Validar</button>
-			</form>
-		</main>
-	</body>
+<head>
+	<link rel="stylesheet" href="style.css">
+	<script src="window-ready.js"></script>
+	<script src="inicio.js"></script>
+</head>
+
+<body>
+	<main>
+		<h1>Expresiones regulares</h1>
+
+		<form>
+			<label for="rfc">RFC: </label>
+			<input id="rfc" type="text" placeholder="Ingresa un RFC válido">
+			<span class="msg" data-campo="rfc"></span>
+			<button type="submit" data-accion="validar">Validar</button>
+		</form>
+	</main>
+</body>
+
 </html>
-
