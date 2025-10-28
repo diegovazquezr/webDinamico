@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <script src="window-ready.js"></script>
+        <script src="inicio.js"></script>
+
+    </head>
+    <body>
+        <main>
+            <form action="">
+                <h1>Formulario</h1>
+
+                <section>
+                    <h2>Datos personales</h2>
+                    <div>
+                        <label for="nombres">Nombre(s)</label>
+                        <input type="text" id="nombres" />
+                        <span data-target="nombres"></span>
+                    </div>
+                    <div>
+                        <label for="apellidos">Apellidos</label>
+                        <input type="text" id="apellidos" />
+                        <span data-target="apellidos"></span>
+                    </div>
+                    <div>
+                        <fieldset>
+                            <legend>Genero</legend>
+                            <div>
+                                <input type="radio" name="genero" id="hombre" value="hombre" />
+                                <label for="hombre">Hombre</label>
+                            </div>
+                            <div>
+                                <input type="radio" name="genero" id="mujer" value="mujer" />
+                                <label for="mujer">Mujer</label>
+                            </div>
+                            <div>
+                                <input type="radio" name="genero" id="otro" value="otro" />
+                                <label for="otro">Otro</label>
+                            </div>
+                            <span data-target="genero"></span>
+                        </fieldset>
+                    </div>
+                    <div>
+                        <label for="curp">CURP</label>
+                        <input type="text" id="curp" />
+                        <span data-target="curp"></span>
+                    </div>
+                    <div>
+                        <fieldset>
+                            <legend>Intereses</legend>
+                            <div>
+                                <input type="checkbox" id="python" name="intereses" value="python" />
+                                <label for="python">Python</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="java" name="intereses" value="java" />
+                                <label for="java">Java</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="C" name="intereses" value="c" />
+                                <label for="c">C/C++</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="js" name="intereses" value="js" />
+                                <label for="js">JavaScript</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="rust" name="intereses" value="rust" />
+                                <label for="rust">Rust</label>
+                            </div>
+                            <span data-target="intereses"></span>
+                        </fieldset>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>Domicilio Actual</h2>
+                    <div>
+                        <label for="calle">Calle</label>
+                        <input type="text" id="calle" />
+                        <span data-target="calle"></span>
+                    </div>
+                    <div>
+                        <label for="municipio">Municipio</label>
+                        <select id="municipio">
+                            <option value="vacio" selected="selected">- -</option>
+                            <option value="alvaro_obregon">Álvaro Obregon</option>
+                            <option value="azcapotzalco">Azcapotzalco</option>
+                            <option value="benito_juarez">Benito Juárez</option>
+                            <option value="coyoacan">Coyoacan</option>
+                            <option value="cuajimalpa_de_morelos">Cuajimalpa de Morelos</option>
+                            <option value="cuauhtemoc">Cuauhtémoc</option>
+                            <option value="gustavo_a_madero">Gustado A. Madero</option>
+                            <option value="iztacalco">Iztacalco</option>
+                            <option value="iztapalapa">Iztapalapa</option>
+                            <option value="magdalena_contreras">Magdalena Contreras</option>
+                            <option value="miguel_hidalgo">Miguel HIdalgo</option>
+                            <option value="milpa_alta">Milpa Alta</option>
+                            <option value="tlahuac">Tláhuac</option>
+                            <option value="tlalpan">Tlalpan</option>
+                            <option value="venustiano_carranza">Venustiano Carranza</option>
+                            <option value="xochimilco">Xochimilco</option>
+                        </select>
+                        <span data-target="municipio"></span>
+                    </div>
+                    <div>
+                        <label for="cp">Código postal</label>
+                        <input type="text" id="cp" />
+                        <span data-target="cp"></span>
+                    </div>
+                    <div>
+                        <div>
+                            <label for="codigo_pais">Código de Pais</label>
+                            <input type="text" id="codigo_pais" />
+                            <span data-target="codigo_pais"></span>
+                        </div>
+                        <div>
+                            <label for="celular">No. de Celular</label>
+                            <input type="tel" id="celular" />
+                            <span data-target="celular"></span>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="correo">Correo electrónico</label>
+                        <input type="email" id="correo" />
+                        <span data-target="correo"></span>
+                    </div>
+                </section>
+
+                <section>
+                    <!-- // reset (esyablecer valores por defecto y cambiar a pristinos) -->
+                    <button type="reset" data-accion="reset">Reset</button>
+                    <!-- // submit (deshabilitado hasta que todos los campos esten llenos) -->
+                    <button type="submit" data-accion="validar">Validar</button>
+                </section>
+            </form>
+        </main>
+    </body>
+</html>
