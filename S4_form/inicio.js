@@ -8,6 +8,8 @@ function init() {
     btnValidar.addEventListener('click', validarFormulario);
     btnReset.addEventListener('click', resetFormulario);
 
+    let formulario = {}; // Almacena la informacion del formulario en un objeto
+
     function resetFormulario() {
         let msgs = document.querySelectorAll("span[data-target]");
         for (msg of msgs) {
@@ -26,7 +28,7 @@ function init() {
         validarCodigoPais();
         validarCelular();
         validarCorreo();
-
+        console.log(formulario)
         e.preventDefault()
     }
 
@@ -60,6 +62,9 @@ function init() {
             msgApellidos.innerText = "ok";
             msgApellidos.classList.add("form_msg_ok");
         }
+
+        formulario.nombres = valorNombres;
+        formulario.apellidos = valorApellidos;
         return true;
     }
 
@@ -74,6 +79,8 @@ function init() {
             if (radio.checked) {
                 msgGenero.innerText = "ok";
                 msgGenero.classList.add("form_msg_ok");
+
+                formulario.genero = radio.value;
                 return true;
             }
         }
@@ -113,6 +120,8 @@ function init() {
 
         msgCurp.innerText = "ok";
         msgCurp.classList.add("form_msg_ok");
+
+        formulario.curp = valor;
         return true;
     }
 
@@ -123,9 +132,11 @@ function init() {
         limpiarMsg(msgIntereses);
 
         let contSeleccionados = 0;
+        let listIntereses = []
         for(checkbox of checkboxIntereses) {
             if(checkbox.checked) {
                 contSeleccionados++;
+                listIntereses.push(checkbox.value);
             }
         }
         
@@ -144,6 +155,8 @@ function init() {
 
         msgIntereses.innerText = "ok";
         msgIntereses.classList.add("form_msg_ok");
+
+        formulario.intereses = listIntereses;
         return true;
 
     }
@@ -164,6 +177,8 @@ function init() {
 
         msgCalle.innerText = "ok";
         msgCalle.classList.add("form_msg_ok");
+
+        formulario.calle = valor;
         return true;
     }
 
@@ -182,6 +197,8 @@ function init() {
 
         msgMunicipio.innerText = "ok";
         msgMunicipio.classList.add("form_msg_ok");
+
+        formulario.municipio = valor;
         return true;
     }
 
@@ -209,6 +226,8 @@ function init() {
 
         msgCP.innerText = "ok";
         msgCP.classList.add("form_msg_ok");
+
+        formulario.cp = valor;
         return true;
     }
 
@@ -239,6 +258,8 @@ function init() {
 
         msgCodigoPais.innerText = "ok";
         msgCodigoPais.classList.add("form_msg_ok");
+
+        formulario.codigo_pais = valor;
         return true;
     }
 
@@ -278,6 +299,8 @@ function init() {
 
         msgCelular.innerText = `${celular}`;
         msgCelular.classList.add("form_msg_ok");
+
+        formulario.celular = celular;
         return true;
     }
 
@@ -304,6 +327,8 @@ function init() {
 
         msgCorreo.innerText = `ok`;
         msgCorreo.classList.add("form_msg_ok");
+
+        formulario.correo = valor;
         return true;
     }
 
