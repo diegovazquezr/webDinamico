@@ -46,8 +46,6 @@ function init() {
     selectMunicipio.dataset.sucio = false; 
     selectMunicipio.addEventListener("change", cambiarEstadoCampo);
     
-    let formulario = {}; // Almacena la informacion del formulario en un objeto
-
     let funcionesValidacion = {
         nombres: validarNombre,
         apellidos: validarApellido,
@@ -71,37 +69,87 @@ function init() {
     }
 
     function validarFormulario(e) {
-        validarNombre();
-        validarApellido();
-        validarGenero();
-        validarRFC();
-        validarCURP();
-        validarIntereses();
-        validarCalle();
-        validarMunicipio();
-        validarCodigoPostal();
-        validarCodigoPais();
-        validarCelular();
-        validarCorreo();
-        console.log(formulario)
-        e.preventDefault()
-    }
+        let formulario = {}; // Almacena la informacion del formulario en un objeto
+        let todosValidos = true;
 
-    function validarNombre() {
-        limpiarMsg(msgNombres);
-
-        if (inputNombres.dataset.pistino === "true" || inputNombres.dataset.sucio === "false") {
-            msgNombres.innerText = "Debes ingresar tus nombres";
-            msgNombres.classList.add("form_msg_error");
-            return false;
+        let resNombre = validarNombre();
+        todosValidos &&= resNombre.valido;
+        if (resNombre.valido) {
+            formulario.nombre = resNombre.valor;
+        }
+        
+        let resApellido = validarApellido();
+        todosValidos &&= resApellido.valido;
+        if (resApellido.valido) {
+            formulario.apellido = resApellido.valor;
         }
 
-        // El campo está sucio, no agregamos más validaciones
-        msgNombres.innerText = "ok";
-        msgNombres.classList.add("form_msg_ok");
-        let valor = inputNombres.value.trim();
-        formulario.nombre = valor;
-        return true;
+        let resGenero = validarGenero();
+        todosValidos &&= resGenero.valido;
+        if (resGenero.valido) {
+            formulario.genero = resGenero.valor;
+        }
+
+        let resRfc = validarRFC();
+        todosValidos &&= resRfc.valido;
+        if (resRfc.valido) {
+            formulario.rfc = resRfc.valor;
+        }
+
+        let resCurp = validarCURP();
+        todosValidos &&= resCurp.valido;
+        if (resCurp.valido) {
+            formulario.curp = resCurp.valor;
+        }
+
+        let resIntereses = validarIntereses();
+        todosValidos &&= resIntereses.valido;
+        if (resIntereses.valido) {
+            formulario.intereses = resIntereses.valor;
+        }
+
+        let resCalle = validarCalle();
+        todosValidos &&= resCalle.valido;
+        if (resCalle.valido) {
+            formulario.direccion = resCalle.valor;
+        }
+
+        let resMunicipio = validarMunicipio();
+        todosValidos &&= resMunicipio.valido;
+        if (resMunicipio.valido) {
+            formulario.municipio = resMunicipio.valor;
+        }
+
+        let resCp = validarCodigoPostal();
+        todosValidos &&= resCp.valido;
+        if (resCp.valido) {
+            formulario.cp = resCp.valor;
+        }
+
+        let resCodigoPais = validarCodigoPais();
+        todosValidos &&= resCodigoPais.valido;
+        if (resCodigoPais.valido) {
+            formulario.codigo_pais = resCodigoPais.valor;
+        }
+
+        let resCelular = validarCelular();
+        todosValidos &&= resCelular.valido;
+        if (resCelular.valido) {
+            formulario.celular = resCelular.valor;
+        }
+        
+        let resCorreo = validarCorreo();
+        todosValidos &&= resCorreo.valido;
+        if (resCorreo.valido) {
+            formulario.email = resCelular.valor;
+        }
+        
+        if (todosValidos) {
+            console.log(formulario)
+
+        }
+
+        e.preventDefault()
     }
 
     function cambiarEstadoCampo(e) {
@@ -136,10 +184,23 @@ function init() {
 
         // validar el campo
         funcionesValidacion[id]();
-
-        // Verificar si habilitar boton de envio
     }
 
+    function validarNombre() {
+        limpiarMsg(msgNombres);
+
+        if (inputNombres.dataset.pistino === "true" || inputNombres.dataset.sucio === "false") {
+            msgNombres.innerText = "Debes ingresar tus nombres";
+            msgNombres.classList.add("form_msg_error");
+            return { valido: false, valor: "" };
+        }
+
+        // El campo está sucio, no agregamos más validaciones
+        msgNombres.innerText = "ok";
+        msgNombres.classList.add("form_msg_ok");
+        let valor = inputNombres.value.trim();
+        return { valido: true, valor: valor };
+    }
 
     function validarApellido() {
         limpiarMsg(msgApellidos);
@@ -147,15 +208,14 @@ function init() {
         if (inputApellidos.dataset.pristino === "true" || inputApellidos.dataset.sucio === "false") {
             msgApellidos.innerText = "Debes ingresar tus apellidos";
             msgApellidos.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: ""};
         }
 
         // El campo está sucio, no agregamos más validaciones
         msgApellidos.innerText = "ok";
         msgApellidos.classList.add("form_msg_ok");
         let valor = inputApellidos.value.trim();
-        formulario.apellido = valor;
-        return true;
+        return { valido: true, valor: valor };
     }
 
     function validarGenero() {
@@ -166,15 +226,14 @@ function init() {
             if (radio.checked) {
                 msgGenero.innerText = "ok";
                 msgGenero.classList.add("form_msg_ok");
-                formulario.genero = radio.value;
-                return true;
+                return { valido: true, valor: radio.value };
             }
         }
 
         // No hubo ningun radio seleccionado
         msgGenero.innerText = "Selecciona una opción";
         msgGenero.classList.add("form_msg_error");
-        return false;
+        return { valido: false, valor: "" };
     }
 
     function validarRFC() {
@@ -183,58 +242,54 @@ function init() {
         if (inputRfc.dataset.pristino === "true" || inputRfc.dataset.sucio === "false") {
             msgCurp.innerText = "Debes ingresar tu RFC";
             msgCurp.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" };
         }
         
         let valor = inputRfc.value.trim();
-
         if (valor.length < 13 || valor.length > 14) {
             msgRfc.innerText = "El RFC debe tener 13 o 14 caracteres";
             msgRfc.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" };
         }
 
         let reRFC = /^[a-z]{4}[0-9]{6}[a-z0-9]{3,4}$/i;
         if (reRFC.test(valor) === false) {
             msgRfc.innerText = "El RFC no es válido";
             msgRfc.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" };
         }
 
         msgRfc.innerText = "ok";
         msgRfc.classList.add("form_msg_ok");
-        formulario.rfc = valor;
-        return true;
+        return { valido: true, valor: valor };
     }
 
     function validarCURP() {
         limpiarMsg(msgCurp);
 
         let valor = inputCurp.value.trim().toUpperCase();
-
         if (inputCurp.dataset.pristino === "true" || inputCurp.dataset.sucio === "false") {
             msgCurp.innerText = "Debes ingresar tu CURP";
             msgCurp.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: ""};
         }
         
         if (valor.length != 18) {
             msgCurp.innerText = "La CURP debe tener 18 caracteres";
             msgCurp.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: ""};
         }
         
         let reCurp = /^[A-Z]{1}[AEIOUX]{1}[A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HM]{1}(AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]{1}\d{1}$/;
         if (reCurp.test(valor) === false) {
             msgCurp.innerText = "Debes ingresar una CURP válida";
             msgCurp.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: ""};
         }
 
         msgCurp.innerText = "ok";
         msgCurp.classList.add("form_msg_ok");
-        formulario.curp = valor;
-        return true;
+        return { valido: true, valor: valor};
     }
 
     function validarIntereses() {
@@ -252,37 +307,34 @@ function init() {
         if(contSeleccionados === 0) {
             msgIntereses.innerText = `Debes seleccionar al menos 3 elementos`;
             msgIntereses.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: []};
         }
 
         if (contSeleccionados < 3) {
             let resta = 3 - contSeleccionados;
             msgIntereses.innerText = `Debes seleccionar ${resta} elementos más`;
             msgIntereses.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: []};
         }
 
         msgIntereses.innerText = "ok";
         msgIntereses.classList.add("form_msg_ok");
-        formulario.intereses = listIntereses;
-        return true;
+        return { valido: true, valor: listIntereses}; 
     }
 
     function validarCalle() {
         limpiarMsg(msgCalle);
 
         let valor = inputCalle.value.trim();
-
         if(valor === "") {
             msgCalle.innerText = "Debes indicar la calle";
             msgCalle.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: ""}; 
         }
 
         msgCalle.innerText = "ok";
         msgCalle.classList.add("form_msg_ok");
-        formulario.direccion = valor;
-        return true;
+        return { valido: true, valor: valor }; 
     }
 
     function validarMunicipio() {
@@ -292,40 +344,34 @@ function init() {
         if (valor === "vacio") {
             msgMunicipio.innerText = "Debes seleccionar un municipio";
             msgMunicipio.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: ""}; 
         }
 
         msgMunicipio.innerText = "ok";
         msgMunicipio.classList.add("form_msg_ok");
-
-        formulario.municipio = valor;
-        return true;
+        return { valido: true, valor: valor }; 
     }
 
     function validarCodigoPostal() {
         limpiarMsg(msgCP);
         
         let valor = inputCP.value.trim();
-        console.log(inputCP.value)
-        
         if (valor === "") {
             msgCP.innerText = "Debes llenar el código postal";
             msgCP.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" }; 
         }
 
         let reCp = /[0-9]{5}/;
         if (reCp.test(valor) === false) {
             msgCP.innerText = "El CP debe estar formado por 5 digitos";
             msgCP.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" }; 
         }
 
         msgCP.innerText = "ok";
         msgCP.classList.add("form_msg_ok");
-
-        formulario.cp = valor;
-        return true;
+        return { valido: true, valor: valor }; 
     }
 
     function validarCodigoPais() {
@@ -335,26 +381,25 @@ function init() {
         if (valor === "") {
             msgCodigoPais.innerText = "Debes ingresar el código de pais";
             msgCodigoPais.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" }; 
         }
+
         let reCodigoPais = /^\d+$/;
         if (reCodigoPais.test(valor) === false) {
             msgCodigoPais.innerText = "Debes ingresar solo digitos";
             msgCodigoPais.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" }; 
         }
 
         if (valor.length > 3) {
             msgCodigoPais.innerText = "No puedes agregar más de 3 digitos";
             msgCodigoPais.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" }; 
         }
 
         msgCodigoPais.innerText = "ok";
         msgCodigoPais.classList.add("form_msg_ok");
-
-        formulario.codigo_pais = valor;
-        return true;
+        return { valido: true, valor: valor }; 
     }
 
     function validarCelular() {
@@ -364,60 +409,55 @@ function init() {
         if (valor === "") {
             msgCelular.innerText = "Debes ingresar tu número celular";
             msgCelular.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" }; 
         }
 
         let listCelular = valor.match(/\d+/g);
         if (listCelular === null) {
             msgCelular.innerText = "Debes ingresar solo digitos";
             msgCelular.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" }; 
 
         }
-        let celular = listCelular.join("");
         
+        let celular = listCelular.join("");
         if(celular.length < 10) {
             msgCelular.innerText = "El celular no puede tener menos de 10 digitos";
             msgCelular.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" }; 
         }
 
         if(celular.length > 12) {
             msgCelular.innerText = "El celular no puede tener más de 12 digitos";
             msgCelular.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" }; 
         }
 
         msgCelular.innerText = `${celular}`;
         msgCelular.classList.add("form_msg_ok");
-
-        formulario.celular = celular;
-        return true;
+        return { valido: true, valor: celular }; 
     }
 
     function validarCorreo() {
         limpiarMsg(msgCorreo);
 
         let valor = inputCorreo.value.trim();
-
         if (valor === "") {
             msgCorreo.innerText = "Debes ingresar tu correo electrónico";
             msgCorreo.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" }; 
         }
 
         let reCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (reCorreo.test(valor) === false) {
             msgCorreo.innerText = "El correo electrónico no es válido";
             msgCorreo.classList.add("form_msg_error");
-            return false;
+            return { valido: false, valor: "" }; 
         }
 
         msgCorreo.innerText = `ok`;
         msgCorreo.classList.add("form_msg_ok");
-
-        formulario.correo = valor;
-        return true;
+        return { valido: true, valor: valor }; 
     }
 
     function limpiarMsg(elem) {
