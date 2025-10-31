@@ -141,17 +141,30 @@ function init() {
         let resCorreo = validarCorreo();
         todosValidos &&= resCorreo.valido;
         if (resCorreo.valido) {
-            formulario.email = resCelular.valor;
+            formulario.email = resCorreo.valor;
         }
         
         if (todosValidos) {
-            console.log(formulario)
-
+            // Enviar formulario al servidor
+            let url = '//webd.gilberto.codes/api/json.php';
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formulario)
+            })
+                .then(respone => respone.json())
+                .then (response => {
+                    console.log(response)
+                })
+                .catch(error => console.error("Error: ", error));
         }
 
         e.preventDefault()
     }
 
+    // Cambiar el valor de los datos pristino y sucio de los campos
     function cambiarEstadoCampo(e) {
         let elem = e.target;
         let id = ""; // id del elemento, para saber a que funcion de validacion llamar
