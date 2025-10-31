@@ -3,12 +3,65 @@ onReady.ready(() => {
 });
 
 function init() {
+    // Botones
     let btnValidar = document.querySelector("button[data-accion='validar']");
     let btnReset= document.querySelector("button[data-accion='reset']");
     btnValidar.addEventListener('click', validarFormulario);
     btnReset.addEventListener('click', resetFormulario);
 
+    // Campos de formulario
+    let inputNombres = document.querySelector("#nombres")
+    let msgNombres = document.querySelector("span[data-target='nombres']");
+    let inputApellidos = document.querySelector("#apellidos")
+    let msgApellidos = document.querySelector("span[data-target='apellidos']");
+    let radiosGenero = document.querySelectorAll("input[name='genero']");
+    let msgGenero = document.querySelector("span[data-target='genero']");
+    let inputRfc = document.querySelector("#rfc");
+    let msgRfc = document.querySelector("span[data-target='rfc']");
+    let inputCurp = document.querySelector("#curp");
+    let msgCurp = document.querySelector("span[data-target='curp']");
+    let checkboxIntereses = document.querySelectorAll("input[name='intereses']");
+    let msgIntereses = document.querySelector("span[data-target='intereses']");
+    let inputCalle = document.querySelector("#calle");
+    let msgCalle = document.querySelector("span[data-target='calle']");
+    let selectMunicipio = document.querySelector("#municipio");
+    let msgMunicipio = document.querySelector("span[data-target='municipio']")
+    let inputCP = document.querySelector("#cp");
+    let msgCP = document.querySelector("span[data-target='cp']");
+    let inputCodigoPais = document.querySelector("#codigo_pais");
+    let msgCodigoPais = document.querySelector("span[data-target='codigo_pais']");
+    let inputCelular = document.querySelector("#celular");
+    let msgCelular = document.querySelector("span[data-target='celular']");
+    let inputCorreo = document.querySelector("#correo");
+    let msgCorreo = document.querySelector("span[data-target='correo']");
+
+    // Agregar estados y evento de camios
+    let inputs = document.querySelectorAll("input");
+    for(input of inputs) {
+        input.dataset.pristino = true; // no ha sido modificado
+        input.dataset.sucio = false; // esta vacio
+        input.addEventListener("change", cambiarEstadoCampo);
+    }
+    selectMunicipio.dataset.pristino = true;
+    selectMunicipio.dataset.sucio = false; 
+    selectMunicipio.addEventListener("change", cambiarEstadoCampo);
+    
     let formulario = {}; // Almacena la informacion del formulario en un objeto
+
+    let funcionesValidacion = {
+        nombres: validarNombre,
+        apellidos: validarApellido,
+        genero: validarGenero,
+        rfc: validarRFC,
+        curp: validarCURP,
+        intereses: validarIntereses,
+        calle: validarCalle,
+        municipio: validarMunicipio,
+        cp: validarCodigoPostal,
+        codigo_pais: validarCodigoPais,
+        celular: validarCelular,
+        correo: validarCorreo
+    }
 
     function resetFormulario() {
         let msgs = document.querySelectorAll("span[data-target]");
@@ -18,8 +71,10 @@ function init() {
     }
 
     function validarFormulario(e) {
-        validarNombresApellidos();
+        validarNombre();
+        validarApellido();
         validarGenero();
+        validarRFC();
         validarCURP();
         validarIntereses();
         validarCalle();
@@ -32,74 +87,132 @@ function init() {
         e.preventDefault()
     }
 
-    function validarNombresApellidos() {
-        let inputNombres = document.querySelector("#nombres")
-        let msgNombres = document.querySelector("span[data-target='nombres']");
-        let inputApellidos = document.querySelector("#apellidos")
-        let msgApellidos= document.querySelector("span[data-target='apellidos']");
-
-        // limpiar mensajes y clases
+    function validarNombre() {
         limpiarMsg(msgNombres);
-        limpiarMsg(msgApellidos);
 
-        let valorNombres = inputNombres.value.trim();
-        let valorApellidos = inputApellidos.value.trim();
-
-        if (valorNombres === "" && valorApellidos === "") {
-            // Nombres y apellidos vacios
-            msgNombres.innerText = "Debes ingresar al menos un nombre o un apellido";
+        if (inputNombres.dataset.pistino === "true" || inputNombres.dataset.sucio === "false") {
+            msgNombres.innerText = "Debes ingresar tus nombres";
             msgNombres.classList.add("form_msg_error");
             return false;
         }
 
-        // Los dos campos están llenos o almenos uno de ellos
-        if (valorNombres !== "") {
-            msgNombres.innerText = "ok";
-            msgNombres.classList.add("form_msg_ok");
+        // El campo está sucio, no agregamos más validaciones
+        msgNombres.innerText = "ok";
+        msgNombres.classList.add("form_msg_ok");
+        let valor = inputNombres.value.trim();
+        formulario.nombre = valor;
+        return true;
+    }
+
+    function cambiarEstadoCampo(e) {
+        let elem = e.target;
+        let id = ""; // id del elemento, para saber a que funcion de validacion llamar
+        elem.dataset.pristino = false;
+
+        if (["text", "tel", "email"].includes(elem.type)) {
+            // sucio es verdadero cuando el campo no está vacio
+            elem.dataset.sucio = (elem.value !== "");
+            id = elem.id;
+        } else if (elem.type === "radio") {
+            // establecer todos los radios del grupo como no sucios
+            for (radio of document.querySelectorAll(`input[type="radio"][name="${elem.name}"]`)) {
+                radio.dataset.sucio = false;
+            }
+            // establecer el radio seleccionado como sucio
+            elem.dataset.sucio = true;
+            id = elem.name;
+        } else if (elem.type === "checkbox") {
+            // cambiar el estado del checkbox de acuerdo a su estado anterior
+            elem.dataset.sucio = (elem.dataset.sucio === "false"); 
+            id = elem.name;
+        } else if (elem.type === "select-one"){
+            if (elem.value === "vacio") {
+                elem.dataset.sucio = false;
+            } else {
+                elem.dataset.sucio = true;
+            }
+            id = elem.id;
         }
 
-        if (valorApellidos !== "") {
-            msgApellidos.innerText = "ok";
-            msgApellidos.classList.add("form_msg_ok");
+        // validar el campo
+        funcionesValidacion[id]();
+
+        // Verificar si habilitar boton de envio
+    }
+
+
+    function validarApellido() {
+        limpiarMsg(msgApellidos);
+
+        if (inputApellidos.dataset.pristino === "true" || inputApellidos.dataset.sucio === "false") {
+            msgApellidos.innerText = "Debes ingresar tus apellidos";
+            msgApellidos.classList.add("form_msg_error");
+            return false;
         }
 
-        formulario.nombres = valorNombres;
-        formulario.apellidos = valorApellidos;
+        // El campo está sucio, no agregamos más validaciones
+        msgApellidos.innerText = "ok";
+        msgApellidos.classList.add("form_msg_ok");
+        let valor = inputApellidos.value.trim();
+        formulario.apellido = valor;
         return true;
     }
 
     function validarGenero() {
-        let radiosGenero = document.querySelectorAll("input[name='genero']");
-        let msgGenero = document.querySelector("span[data-target='genero']");
-        
         limpiarMsg(msgGenero);
 
-        // Comprobar que una de las opcinoes está seleccionada
+        // Verificar que una de las opcinoes está seleccionada
         for (radio of radiosGenero) {
             if (radio.checked) {
                 msgGenero.innerText = "ok";
                 msgGenero.classList.add("form_msg_ok");
-
                 formulario.genero = radio.value;
                 return true;
             }
         }
 
-        // No hay ningun radio seleccionado
+        // No hubo ningun radio seleccionado
         msgGenero.innerText = "Selecciona una opción";
         msgGenero.classList.add("form_msg_error");
         return false;
     }
 
-    function validarCURP() {
-        let inputCurp = document.querySelector("#curp");
-        let msgCurp = document.querySelector("span[data-target='curp']");
+    function validarRFC() {
+        limpiarMsg(msgRfc);
 
+        if (inputRfc.dataset.pristino === "true" || inputRfc.dataset.sucio === "false") {
+            msgCurp.innerText = "Debes ingresar tu RFC";
+            msgCurp.classList.add("form_msg_error");
+            return false;
+        }
+        
+        let valor = inputRfc.value.trim();
+
+        if (valor.length < 13 || valor.length > 14) {
+            msgRfc.innerText = "El RFC debe tener 13 o 14 caracteres";
+            msgRfc.classList.add("form_msg_error");
+            return false;
+        }
+
+        let reRFC = /^[a-z]{4}[0-9]{6}[a-z0-9]{3,4}$/i;
+        if (reRFC.test(valor) === false) {
+            msgRfc.innerText = "El RFC no es válido";
+            msgRfc.classList.add("form_msg_error");
+            return false;
+        }
+
+        msgRfc.innerText = "ok";
+        msgRfc.classList.add("form_msg_ok");
+        formulario.rfc = valor;
+        return true;
+    }
+
+    function validarCURP() {
         limpiarMsg(msgCurp);
 
         let valor = inputCurp.value.trim().toUpperCase();
 
-        if (valor === "") {
+        if (inputCurp.dataset.pristino === "true" || inputCurp.dataset.sucio === "false") {
             msgCurp.innerText = "Debes ingresar tu CURP";
             msgCurp.classList.add("form_msg_error");
             return false;
@@ -120,15 +233,11 @@ function init() {
 
         msgCurp.innerText = "ok";
         msgCurp.classList.add("form_msg_ok");
-
         formulario.curp = valor;
         return true;
     }
 
     function validarIntereses() {
-        let checkboxIntereses = document.querySelectorAll("input[name='intereses']");
-        let msgIntereses = document.querySelector("span[data-target='intereses']");
-
         limpiarMsg(msgIntereses);
 
         let contSeleccionados = 0;
@@ -141,7 +250,7 @@ function init() {
         }
         
         if(contSeleccionados === 0) {
-            msgIntereses.innerText = `Debes seleccionar 3 elementos`;
+            msgIntereses.innerText = `Debes seleccionar al menos 3 elementos`;
             msgIntereses.classList.add("form_msg_error");
             return false;
         }
@@ -155,16 +264,11 @@ function init() {
 
         msgIntereses.innerText = "ok";
         msgIntereses.classList.add("form_msg_ok");
-
         formulario.intereses = listIntereses;
         return true;
-
     }
 
     function validarCalle() {
-        let inputCalle = document.querySelector("#calle");
-        let msgCalle = document.querySelector("span[data-target='calle']");
-
         limpiarMsg(msgCalle);
 
         let valor = inputCalle.value.trim();
@@ -177,15 +281,11 @@ function init() {
 
         msgCalle.innerText = "ok";
         msgCalle.classList.add("form_msg_ok");
-
-        formulario.calle = valor;
+        formulario.direccion = valor;
         return true;
     }
 
     function validarMunicipio() {
-        let selectMunicipio = document.querySelector("#municipio");
-        let msgMunicipio = document.querySelector("span[data-target='municipio']")
-
         limpiarMsg(msgMunicipio);
 
         let valor = selectMunicipio.value;
@@ -203,9 +303,6 @@ function init() {
     }
 
     function validarCodigoPostal() {
-        let inputCP = document.querySelector("#cp");
-        let msgCP = document.querySelector("span[data-target='cp']");
-
         limpiarMsg(msgCP);
         
         let valor = inputCP.value.trim();
@@ -232,9 +329,6 @@ function init() {
     }
 
     function validarCodigoPais() {
-        let inputCodigoPais = document.querySelector("#codigo_pais");
-        let msgCodigoPais = document.querySelector("span[data-target='codigo_pais']");
-
         limpiarMsg(msgCodigoPais);
 
         let valor = inputCodigoPais.value.trim();
@@ -264,9 +358,6 @@ function init() {
     }
 
     function validarCelular() {
-        let inputCelular = document.querySelector("#celular");
-        let msgCelular = document.querySelector("span[data-target='celular']");
-
         limpiarMsg(msgCelular);
 
         let valor = inputCelular.value.trim();
@@ -305,9 +396,6 @@ function init() {
     }
 
     function validarCorreo() {
-        let inputCorreo = document.querySelector("#correo");
-        let msgCorreo = document.querySelector("span[data-target='correo']");
-
         limpiarMsg(msgCorreo);
 
         let valor = inputCorreo.value.trim();
