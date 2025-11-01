@@ -9,6 +9,13 @@ function init() {
     btnValidar.addEventListener('click', validarFormulario);
     btnReset.addEventListener('click', resetFormulario);
 
+    // modal
+    let modal = document.querySelector("#modal")
+    let msgIdRespuesta= document.querySelector("p[data-target='id_respuesta']")
+    let msgRespuesta= document.querySelector("p[data-target='msg_respuesta']")
+    let cerrar_modal = document.querySelector("#cerrar_modal")
+    cerrar_modal.addEventListener("click", cerrarModal);
+
     // Campos de formulario
     let inputNombres = document.querySelector("#nombres")
     let msgNombres = document.querySelector("span[data-target='nombres']");
@@ -68,7 +75,14 @@ function init() {
         }
     }
 
+    function cerrarModal(e) {
+        modal.close();
+        msgIdRespuesta.innerText = "";
+        msgRespuesta.innerText = "";
+    }
+
     function validarFormulario(e) {
+        e.preventDefault()
         let formulario = {}; // Almacena la informacion del formulario en un objeto
         let todosValidos = true;
 
@@ -147,6 +161,7 @@ function init() {
         if (todosValidos) {
             // Enviar formulario al servidor
             let url = '//webd.gilberto.codes/api/json.php';
+            let ok = false;
             fetch(url, {
                 method: "POST",
                 headers: {
@@ -154,14 +169,21 @@ function init() {
                 },
                 body: JSON.stringify(formulario)
             })
-                .then(respone => respone.json())
                 .then (response => {
-                    console.log(response)
+                    ok = response.ok;
+                    return response.json()
+                })
+                .then (data=> {
+                    if (ok) {
+                        msgIdRespuesta.innerText = `Tu id es ${data.id}`;
+                        msgRespuesta.innerText = data.mensaje;
+                        modal.showModal();
+                    } else {
+                        mostrarErroresServidor(data);
+                    }
                 })
                 .catch(error => console.error("Error: ", error));
         }
-
-        e.preventDefault()
     }
 
     // Cambiar el valor de los datos pristino y sucio de los campos
@@ -471,6 +493,39 @@ function init() {
         msgCorreo.innerText = `ok`;
         msgCorreo.classList.add("form_msg_ok");
         return { valido: true, valor: valor }; 
+    }
+
+    function mostrarErroresServidor(data) {
+        // nombnre
+        if (data.nombre.length > 0) {
+            msgNombres.innerText = data.nombre[0];
+            msgNombres.classList.add("form_msg_error");
+        }
+        // apellido 
+        if (data.apellido.length > 0) {
+            msgApellidos.innerText = data.apellido[0];
+            msgApellidos.classList.add("form_msg_error");
+        }
+        // rfc
+        if (data.rfc.length > 0) {
+            msgRfc.innerText = data.rfc[0];
+            msgRfc.classList.add("form_msg_error");
+        }
+        // cp
+        if (data.cp.length > 0) {
+            msgCP.innerText = data.cp[0];
+            msgCP.classList.add("form_msg_error");
+        }
+        // direccion
+        if (data.direccion.length > 0) {
+            msgCalle.innerText = data.direccion[0];
+            msgCalle.classList.add("form_msg_error");
+        }
+        // email
+        if (data.email.length > 0) {
+            msgCorreo.innerText = data.email[0];
+            msgCorreo.classList.add("form_msg_error");
+        }
     }
 
     function limpiarMsg(elem) {
