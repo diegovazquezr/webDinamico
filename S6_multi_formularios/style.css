@@ -52,3 +52,15 @@ input:focus {
 .msg_error {
     color: red;
 }
+
+nav {
+    display: flex;
+    gap: 20px;
+    justify-content: flex-end;
+}
+
+nav button, button[type='reset'] {
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 1.1em;
+}

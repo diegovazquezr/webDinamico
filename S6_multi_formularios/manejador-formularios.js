@@ -2,10 +2,58 @@ onReady.ready(() => {
     let btn_agregar_form = document.querySelector("button[data-accion='agregar']");
     btn_agregar_form.addEventListener('click', agregarFormulario);
 
+    let btn_enviar_forms = document.querySelector("button[data-accion='enviar_todos']")
+    btn_enviar_forms.addEventListener('click', enviarFormularios);
+
     // Dentro del contenedor de formularios se agregan nuevos formularios
     let form_grid_container = document.querySelector("#form-grid-container");
 
     let cont_form = 1; // Cada formulario tiene asociado un numero
+
+    function enviarFormularios(event) {
+        event.preventDefault();
+        let errores = false;
+        let cuerpos_formularios = [] // Almacena la información de los formularios
+
+        let forms = document.querySelectorAll("form");
+        for (form of forms) {
+            let cuerpo = {} // Información del formulario actual
+
+            let inputs = form.querySelectorAll("input");
+            for (input of inputs) {
+                let respuesta = validarCampo(input);
+                if (respuesta.valido === false) {
+                    errores = true;
+                }
+                cuerpo[`${input.name}`] = respuesta.valor;
+            }
+            cuerpos_formularios.push(cuerpo);
+        }
+        
+        // Validar si no hay formularios
+        if (forms.length == 0) {
+            console.log("Debes agregar al menos un formulario");
+            return
+        }
+
+        // Validar si no hubo errores en los formularios
+        if (errores) {
+            console.log("Resuelve todos los errores");
+            return
+        }
+
+        console.log(cuerpos_formularios);
+
+        // Enviar formularios al servidor
+        for (cuerpo of cuerpos_formularios) {
+            // Crear promesa por por cada formulario
+            // serlalizar objeto
+        }
+        // enviar todas las promesas
+        // esperar a que todas las promesas respondan
+        // mostrar errores del servidor en los formularios correspondientes.
+
+    }
 
     function cambiarEstadoCampo(event) {
         event.preventDefault();
@@ -23,19 +71,19 @@ onReady.ready(() => {
     // Llama la funcion de validación correspondiente
     function validarCampo(element) {
         if (element.name == "nombre") {
-             console.log(validarNombre(element));
+             return validarNombre(element);
         } else if (element.name == "apellido") {
-             console.log(validarApellido(element));
+             return validarApellido(element);
         } else if (element.name == "rfc") {
-             console.log(validarRfc(element));
+             return validarRfc(element);
         } else if (element.name == "calle") {
-             console.log(validarCalle(element));
+             return validarCalle(element);
         } else if (element.name == "cp") {
-             console.log(validarCp(element));
+             return validarCp(element);
         } else if (element.name == "celular") {
-             console.log(validarCelular(element));
+             return validarCelular(element);
         } else if (element.name == "correo") {
-             console.log(validarCorreo(element));
+             return validarCorreo(element);
         }
     }
 
@@ -222,7 +270,7 @@ onReady.ready(() => {
     function resetFormulario(e) {
         // Recupera el formulario padre
         let form = document.querySelector(`#${e.target.dataset.target}`)
-        
+
         // Selecciona todos los elementos de mensajes
         let msgs = form.querySelectorAll("span[data-target]");
         // Limpiar todos los mensajes
@@ -448,6 +496,5 @@ onReady.ready(() => {
 
         cont_form++;
     }
-
 })
 
