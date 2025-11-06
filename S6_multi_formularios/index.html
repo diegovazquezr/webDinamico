@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="style.css">
+    <script src="window-ready.js"></script>
+    <script src="manejador-formularios.js"></script>
+
+</head>
+
+<body>
+    <nav>
+        <button type="button" data-accion="agregar">Agregar</button>
+        <button type="submit" data-accion="enviar">Enviar</button>
+    </nav>
+    <main>
+        <h1>Formularios </h1>
+        <div class="grid-container" id="form-grid-container">
+            <div class="form-card">
+                <form id="form1">
+                    <section>
+                        <div>
+                            <label for="nombre0">Nombre</label>
+                            <input type="text" id="nombre0" name="nombre" />
+                            <span data-target="nombre0"></span>
+                        </div>
+                        <div>
+                            <label for="apellido0">Apellido</label>
+                            <input type="text" id="apellido0" />
+                            <span data-target="apellido0"></span>
+                        </div>
+                        <div>
+                            <label for="rfc0">RFC</label>
+                            <input type="text" id="rfc0" />
+                            <span data-target="rfc0"></span>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div>
+                            <label for="calle0">Calle</label>
+                            <input type="text" id="calle0" />
+                            <span data-target="calle0"></span>
+                        </div>
+                        <div>
+                            <label for="cp0">Código postal</label>
+                            <input type="text" id="cp0" />
+                            <span data-target="cp0"></span>
+                        </div>
+                        <div>
+                            <label for="celular0">No. de Celular</label>
+                            <input type="tel" id="celular0" />
+                            <span data-target="celular0"></span>
+                        </div>
+                        <div>
+                            <label for="correo0">Correo electrónico</label>
+                            <input type="email" id="correo0" />
+                            <span data-target="correo0"></span>
+                        </div>
+                    </section>
+
+                    <section>
+                        <button type="reset" data-accion="reset">Reset</button>
+                    </section>
+                </form>
+            </div>
+        </div>
+
+        <dialog id="modal">
+            <p data-target="id_respuesta"></p>
+            <p data-target="msg_respuesta"></p>
+            <button id="cerrar_modal" type="button">Cerrar</button>
+        </dialog>
+    </main>
+</body>
+
+</html>
