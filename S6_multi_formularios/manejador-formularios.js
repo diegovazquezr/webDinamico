@@ -219,6 +219,26 @@ onReady.ready(() => {
         element.classList.remove("msg_ok");
     }
 
+    function resetFormulario(e) {
+        // Recupera el formulario padre
+        let form = document.querySelector(`#${e.target.dataset.target}`)
+        
+        // Selecciona todos los elementos de mensajes
+        let msgs = form.querySelectorAll("span[data-target]");
+        // Limpiar todos los mensajes
+        for (msg of msgs) {
+            limpiarMsg(msg);
+        }
+
+        // Selecciona todos los campos
+        let inputs = form.querySelectorAll("input");
+        // Establecer pristino en true y sucio en false
+        for (input of inputs) {
+            input.dataset.pristino = true;
+            input.dataset.sucio = false;
+        }
+    }
+
     function agregarFormulario(e) {
         // div form-card
         let div_form_card = document.createElement("div");
@@ -422,6 +442,8 @@ onReady.ready(() => {
         btn_reset.innerText = "Reset";
         btn_reset.setAttribute("type", "reset");
         btn_reset.dataset.accion = `reset${cont_form}`;
+        btn_reset.dataset.target = `form${cont_form}`;
+        btn_reset.addEventListener('click', resetFormulario);
         seccion_botones.appendChild(btn_reset);
 
         cont_form++;
