@@ -10,6 +10,40 @@ onReady.ready(() => {
 
     let cont_form = 1; // Cada formulario tiene asociado un numero
 
+    function enviar(url, cuerpo) {
+        return new Promise((resolve, reject) => {
+            // EL códigfo dentro de la promesa se ejecutra de forma asincrona
+            // y es quien decide si la promesa es resulta o reochazada.
+            const promise_fetch = fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(cuerpo)
+            });
+
+            promise_fetch.then((response) => { // La promesa fue resulta (fetch llamó internamente a resolve)
+                if(!response.ok){
+                    return response.json().then((data_errors) => {
+                        let error = new Error("La llamada a fetch no se completo"); // fetch devueve un estado de error
+                        error.data = data_errors;
+                        throw error;
+                    });
+                }
+                return response.json(); // Devuelve una promesa
+            })
+            .then((data) => {
+                console.log("La promesa (fetch) fue resulta"); // La promesa del fetch fue resulta correctamente
+                resolve(data);
+                
+            })
+            .catch((error) => { // La promesa fue rechaza (fetch llamó internamente a reject) o hubo una excepción
+                console.error("La promesa (fetch) fue rechazada o se lanzo una excepción");
+                reject(error);
+            })
+        });
+    }
+
     function enviarFormularios(event) {
         event.preventDefault();
         let errores = false;
@@ -36,22 +70,27 @@ onReady.ready(() => {
             return
         }
 
-        // Validar si no hubo errores en los formularios
+        // Validar si hubo errores en los formularios
         if (errores) {
             console.log("Resuelve todos los errores");
             return
         }
 
-        console.log(cuerpos_formularios);
-
-        // Enviar formularios al servidor
-        for (cuerpo of cuerpos_formularios) {
-            // Crear promesa por por cada formulario
-            // serlalizar objeto
-        }
-        // enviar todas las promesas
-        // esperar a que todas las promesas respondan
-        // mostrar errores del servidor en los formularios correspondientes.
+        // Enviar la información de todos los formularios
+        Promise.allSettled(
+            cuerpos_formularios.map(cuerpo => enviar("//webd.gilberto.codes/api/json.php", cuerpo))
+        )
+        .then(respuestas => {
+            respuestass.forEach((respuesta, idx) => {
+                if (respuesta.status === "fulfilled") { // Envio completado
+                    // ocultar formulario de la vista o deshabilitar
+                }
+                if (respuesta.status === "rejected") { // Envio rechazado
+                    // Mostrar mensaje de errores
+                    respuesta.reason.data
+                }
+            });
+        })
 
     }
 
@@ -76,14 +115,14 @@ onReady.ready(() => {
              return validarApellido(element);
         } else if (element.name == "rfc") {
              return validarRfc(element);
-        } else if (element.name == "calle") {
-             return validarCalle(element);
+        } else if (element.name == "direccion") {
+             return validarDireccion(element);
         } else if (element.name == "cp") {
              return validarCp(element);
         } else if (element.name == "celular") {
              return validarCelular(element);
-        } else if (element.name == "correo") {
-             return validarCorreo(element);
+        } else if (element.name == "email") {
+             return validarEmail(element);
         }
     }
 
@@ -156,7 +195,7 @@ onReady.ready(() => {
         return { valido: true, valor: valor };
     }
 
-    function validarCalle(input_element) {
+    function validarDireccion(input_element) {
         let msg_calle = document.querySelector(`span[data-target="${input_element.id}"]`)
         limpiarMsg(msg_calle);
 
@@ -234,14 +273,14 @@ onReady.ready(() => {
         return { valido: true, valor: celular }; 
     }
 
-    function validarCorreo(input_element) {
-        let msg_correo = document.querySelector(`span[data-target="${input_element.id}"]`)
-        limpiarMsg(msg_correo);
+    function validarEmail(input_element) {
+        let msg_email = document.querySelector(`span[data-target="${input_element.id}"]`)
+        limpiarMsg(msg_email);
 
         // Valida que el campo correo no este vacio
         if(input_element.dataset.pristino === "true" || input_element.dataset.sucio === "false") {
-            msg_correo.innerText = "Debes ingresar tu correo electrónico";
-            msg_correo.classList.add("msg_error");
+            msg_email.innerText = "Debes ingresar tu correo electrónico";
+            msg_email.classList.add("msg_error");
             return { valido: false, valor: "" };
         }
 
@@ -249,14 +288,14 @@ onReady.ready(() => {
         let valor = input_element.value.trim();
         let re_correo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (re_correo.test(valor) === false) {
-            msg_correo.innerText = "El correo electrónico no es válido";
-            msg_correo.classList.add("msg_error");
+            msg_email.innerText = "El correo electrónico no es válido";
+            msg_email.classList.add("msg_error");
             return { valido: false, valor: "" }; 
         }
 
         // El correo es válido
-        msg_correo.innerText = `ok`;
-        msg_correo.classList.add("msg_ok");
+        msg_email.innerText = `ok`;
+        msg_email.classList.add("msg_ok");
         return { valido: true, valor: valor }; 
     }
 
@@ -381,30 +420,30 @@ onReady.ready(() => {
         let seccion_direccion= document.createElement("seccion");
         form.appendChild(seccion_direccion)
 
-        // div calle 
-        let div_calle = document.createElement("div");
-        seccion_direccion.appendChild(div_calle);
+        // div direccion
+        let div_direccion = document.createElement("div");
+        seccion_direccion.appendChild(div_direccion);
 
-        // label calle
-        let label_calle = document.createElement("label");
-        label_calle.innerText = "Calle";
-        label_calle.setAttribute("for", `calle${cont_form}`);
-        div_calle.appendChild(label_calle);
+        // label direccion
+        let label_direccion = document.createElement("label");
+        label_direccion.innerText = "Direccion";
+        label_direccion.setAttribute("for", `direccion${cont_form}`);
+        div_direccion.appendChild(label_direccion);
 
-        // input calle
-        let input_calle = document.createElement("input");
-        input_calle.setAttribute("type", "text");
-        input_calle.setAttribute("id", `calle${cont_form}`);
-        input_calle.setAttribute("name", `calle`);
-        input_calle.dataset.pristino = true;
-        input_calle.dataset.sucio = false;
-        input_calle.addEventListener('change', cambiarEstadoCampo);
-        div_calle.appendChild(input_calle);
+        // input direccion
+        let input_direccion = document.createElement("input");
+        input_direccion.setAttribute("type", "text");
+        input_direccion.setAttribute("id", `direccion${cont_form}`);
+        input_direccion.setAttribute("name", `direccion`);
+        input_direccion.dataset.pristino = true;
+        input_direccion.dataset.sucio = false;
+        input_direccion.addEventListener('change', cambiarEstadoCampo);
+        div_direccion.appendChild(input_direccion);
 
-        // span calle
-        let span_calle = document.createElement("span");
-        span_calle.dataset.target = `calle${cont_form}`;
-        div_calle.appendChild(span_calle);
+        // span direccion
+        let span_direccion = document.createElement("span");
+        span_direccion.dataset.target = `direccion${cont_form}`;
+        div_direccion.appendChild(span_direccion);
 
         // div cp 
         let div_cp = document.createElement("div");
@@ -457,31 +496,31 @@ onReady.ready(() => {
         div_celular.appendChild(span_celular);
 
         // div correo 
-        let div_correo = document.createElement("div");
-        seccion_direccion.appendChild(div_correo);
+        let div_email = document.createElement("div");
+        seccion_direccion.appendChild(div_email);
 
         // label correo
-        let label_correo = document.createElement("label");
-        label_correo.innerText = "Correo electrónico";
-        label_correo.setAttribute("for", `correo${cont_form}`);
-        div_correo.appendChild(label_correo);
+        let label_email = document.createElement("label");
+        label_email.innerText = "Correo electrónico";
+        label_email.setAttribute("for", `email${cont_form}`);
+        div_email.appendChild(label_email);
 
         // input correo
-        let input_correo = document.createElement("input");
-        input_correo.setAttribute("type", "email");
-        input_correo.setAttribute("id", `correo${cont_form}`);
-        input_correo.setAttribute("name", `correo`);
-        input_correo.dataset.pristino = true;
-        input_correo.dataset.sucio = false;
-        input_correo.addEventListener('change', cambiarEstadoCampo);
-        div_correo.appendChild(input_correo);
+        let input_email = document.createElement("input");
+        input_email.setAttribute("type", "email");
+        input_email.setAttribute("id", `email${cont_form}`);
+        input_email.setAttribute("name", `email`);
+        input_email.dataset.pristino = true;
+        input_email.dataset.sucio = false;
+        input_email.addEventListener('change', cambiarEstadoCampo);
+        div_email.appendChild(input_email);
 
         // span correo
-        let span_correo = document.createElement("span");
-        span_correo.dataset.target = `correo${cont_form}`;
-        div_correo.appendChild(span_correo);
+        let span_email = document.createElement("span");
+        span_email.dataset.target = `email${cont_form}`;
+        div_email.appendChild(span_email);
 
-        // seccion direcion 
+        // seccion botones
         let seccion_botones = document.createElement("seccion");
         form.appendChild(seccion_botones)
 
