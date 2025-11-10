@@ -220,6 +220,8 @@ onReady.ready(() => {
             }
             // establecer el radio seleccionado como sucio
             element.dataset.sucio = true;
+        } else if (element.type === "checkbox") {
+            element.dataset.sucio = (element.dataset.sucio === "false");
         }
 
         validarCampo(element);
@@ -235,6 +237,8 @@ onReady.ready(() => {
             return validarSexo(element);
         } else if (element.name == "rfc") {
              return validarRfc(element);
+        } else if(element.name == "intereses") {
+            return validarIntereses(element);
         } else if (element.name == "direccion") {
              return validarDireccion(element);
         } else if (element.name == "cp") {
@@ -330,6 +334,40 @@ onReady.ready(() => {
         msg_rfc.innerText = "ok";
         msg_rfc.classList.add("msg_ok");
         return { valido: true, valor: valor };
+    }
+
+    function validarIntereses(input_element) {
+        let msg_intereses = document.querySelector(`span[data-target="${input_element.dataset.padre}"]`)
+        limpiarMsg(msg_intereses);
+
+        let cont_seleccionados = 0;
+        let array_intereses = [];
+
+        for (checkbox of document.querySelectorAll(`input[type="checkbox"][data-padre="${input_element.dataset.padre}"]`)) {
+            if (checkbox.checked) {
+                cont_seleccionados++;
+                array_intereses.push(checkbox.value);
+            }
+        }
+
+        // Valida que haya algun elemento seleccionado
+        if (cont_seleccionados === 0) {
+            msg_intereses.innerText = "Debes seleccionar al menos 2 elemento";
+            msg_intereses.classList.add("msg_error");
+            return { valido: false, valor: [] };
+        }
+
+        // Valida que hay al menos 2 elementos seleccionados
+        if (cont_seleccionados < 2) {
+            msg_intereses.innerText = `Debes seleccionar ${2 - cont_seleccionados} elementos más`;
+            msg_intereses.classList.add("msg_error");
+            return { valido: false, valor: [] };
+        }
+
+        // Información valida
+        msg_intereses.innerText = "ok";
+        msg_intereses.classList.add("msg_ok");
+        return { valido: true, valor: array_intereses };
     }
 
     function validarDireccion(input_element) {
@@ -537,7 +575,7 @@ onReady.ready(() => {
 
         // fieldset sexo
         let fieldset_sexo = document.createElement("fieldset");
-        fieldset_sexo.setAttribute("id", `fieldset${cont_form}`);
+        fieldset_sexo.setAttribute("id", `fs_sexo${cont_form}`);
         div_sexo.appendChild(fieldset_sexo);
 
         // legend sexo
@@ -553,7 +591,7 @@ onReady.ready(() => {
         input_sexo_masculino.setAttribute("value", "masculino");
         input_sexo_masculino.dataset.pristino = true;
         input_sexo_masculino.dataset.sucio = false;
-        input_sexo_masculino.dataset.padre = `fieldset${cont_form}`;
+        input_sexo_masculino.dataset.padre = `fs_sexo${cont_form}`;
         input_sexo_masculino.addEventListener('change', cambiarEstadoCampo);
         fieldset_sexo.appendChild(input_sexo_masculino);
 
@@ -571,7 +609,7 @@ onReady.ready(() => {
         input_sexo_femenino.setAttribute("value", "femenino");
         input_sexo_femenino.dataset.pristino = true;
         input_sexo_femenino.dataset.sucio = false;
-        input_sexo_femenino.dataset.padre = `fieldset${cont_form}`;
+        input_sexo_femenino.dataset.padre = `fs_sexo${cont_form}`;
         input_sexo_femenino.addEventListener('change', cambiarEstadoCampo);
         fieldset_sexo.appendChild(input_sexo_femenino);
 
@@ -583,7 +621,7 @@ onReady.ready(() => {
 
         // span sexo
         let span_sexo = document.createElement("span");
-        span_sexo.dataset.target = `fieldset${cont_form}`;
+        span_sexo.dataset.target = `fs_sexo${cont_form}`;
         fieldset_sexo.appendChild(span_sexo);
 
         // div RFC 
@@ -615,7 +653,96 @@ onReady.ready(() => {
         // TODO
 
         // div intereses
-        // TODO
+        let div_intereses = document.createElement("div");
+        seccion_personal.appendChild(div_intereses);
+
+        // fielset intereses
+        let fieldset_intereses = document.createElement("fieldset");
+        fieldset_intereses.setAttribute("id", `fs_intereses${cont_form}`);
+        div_intereses.appendChild(fieldset_intereses);
+
+        // legend sexo
+        let legend_intereses = document.createElement("legend");
+        legend_intereses.innerText = "Intereses";
+        fieldset_intereses.appendChild(legend_intereses);
+
+        // input intereses > Python
+        let input_intereses_python = document.createElement("input");
+        input_intereses_python.setAttribute("type", "checkbox");
+        input_intereses_python.setAttribute("name", "intereses");
+        input_intereses_python.setAttribute("id", `intereses_python${cont_form}`);
+        input_intereses_python.setAttribute("value", "python");
+        input_intereses_python.dataset.pristino = true;
+        input_intereses_python.dataset.sucio = false;
+        input_intereses_python.dataset.padre = `fs_intereses${cont_form}`;
+        input_intereses_python.addEventListener('change', cambiarEstadoCampo);
+        fieldset_intereses.appendChild(input_intereses_python);
+
+        // label intereses > python
+        let label_intereses_python = document.createElement("label");
+        label_intereses_python.innerText = "Python";
+        label_intereses_python.setAttribute("for", `intereses_python${cont_form}`);
+        fieldset_intereses.appendChild(label_intereses_python);
+
+        // input intereses > JavaScript 
+        let input_intereses_js = document.createElement("input");
+        input_intereses_js.setAttribute("type", "checkbox");
+        input_intereses_js.setAttribute("name", "intereses");
+        input_intereses_js.setAttribute("id", `intereses_js${cont_form}`);
+        input_intereses_js.setAttribute("value", "javascript");
+        input_intereses_js.dataset.pristino = true;
+        input_intereses_js.dataset.sucio = false;
+        input_intereses_js.dataset.padre = `fs_intereses${cont_form}`;
+        input_intereses_js.addEventListener('change', cambiarEstadoCampo);
+        fieldset_intereses.appendChild(input_intereses_js);
+
+        // label intereses > js
+        let label_intereses_js = document.createElement("label");
+        label_intereses_js.innerText = "JavaScript";
+        label_intereses_js.setAttribute("for", `intereses_js${cont_form}`);
+        fieldset_intereses.appendChild(label_intereses_js);
+
+        // input intereses > C
+        let input_intereses_c = document.createElement("input");
+        input_intereses_c.setAttribute("type", "checkbox");
+        input_intereses_c.setAttribute("name", "intereses");
+        input_intereses_c.setAttribute("id", `intereses_c${cont_form}`);
+        input_intereses_c.setAttribute("value", "c_c++");
+        input_intereses_c.dataset.pristino = true;
+        input_intereses_c.dataset.sucio = false;
+        input_intereses_c.dataset.padre = `fs_intereses${cont_form}`;
+        input_intereses_c.addEventListener('change', cambiarEstadoCampo);
+        fieldset_intereses.appendChild(input_intereses_c);
+
+        // label intereses > C
+        let label_intereses_c = document.createElement("label");
+        label_intereses_c.innerText = "C/C++";
+        label_intereses_c.setAttribute("for", `intereses_c${cont_form}`);
+        fieldset_intereses.appendChild(label_intereses_c);
+
+        // input intereses > Java
+        let input_intereses_java = document.createElement("input");
+        input_intereses_java.setAttribute("type", "checkbox");
+        input_intereses_java.setAttribute("name", "intereses");
+        input_intereses_java.setAttribute("id", `intereses_java${cont_form}`);
+        input_intereses_java.setAttribute("value", "java");
+        input_intereses_java.dataset.pristino = true;
+        input_intereses_java.dataset.sucio = false;
+        input_intereses_java.dataset.padre = `fs_intereses${cont_form}`;
+        input_intereses_java.addEventListener('change', cambiarEstadoCampo);
+        fieldset_intereses.appendChild(input_intereses_java);
+
+        // label intereses > Java
+        let label_intereses_java = document.createElement("label");
+        label_intereses_java.innerText = "Java";
+        label_intereses_java.setAttribute("for", `intereses_java${cont_form}`);
+        fieldset_intereses.appendChild(label_intereses_java);
+
+        // span intereses
+        let span_intereses = document.createElement("span");
+        span_intereses.dataset.target = `fs_intereses${cont_form}`;
+        fieldset_intereses.appendChild(span_intereses);
+
 
         // seccion direcion 
         let seccion_direccion= document.createElement("seccion");
