@@ -5,6 +5,8 @@ onReady.ready(() => {
     let btn_enviar_forms = document.querySelector("button[data-accion='enviar_todos']")
     btn_enviar_forms.addEventListener('click', enviarFormularios);
 
+    let modal = document.querySelector("#modal");
+
     // Dentro del contenedor de formularios se agregan nuevos formularios
     let form_grid_container = document.querySelector("#form-grid-container");
 
@@ -33,7 +35,7 @@ onReady.ready(() => {
                 return response.json(); // Devuelve una promesa
             })
             .then((data) => {
-                console.log("La promesa (fetch) fue resulta"); // La promesa del fetch fue resulta correctamente
+                console.log("La promesa (fetch) fue resuelta"); // La promesa del fetch fue resulta correctamente
                 resolve(data);
                 
             })
@@ -46,10 +48,19 @@ onReady.ready(() => {
 
     function enviarFormularios(event) {
         event.preventDefault();
+
+        let forms = document.querySelectorAll("form[data-habilitado='true']");
+        if (forms.length == 0) {
+            console.log("Debes agregar al menos un formulario");
+            return
+        }
+        
+        // Deshabilitar todos los formularios que no han sido enviados
+        deshabilitarFormularios();
+
         let errores = false;
         let cuerpos_formularios = [] // Almacena la información de los formularios
 
-        let forms = document.querySelectorAll("form");
         for (form of forms) {
             let cuerpo = {} // Información del formulario actual
 
@@ -63,36 +74,136 @@ onReady.ready(() => {
             }
             cuerpos_formularios.push(cuerpo);
         }
-        
-        // Validar si no hay formularios
-        if (forms.length == 0) {
-            console.log("Debes agregar al menos un formulario");
-            return
-        }
 
         // Validar si hubo errores en los formularios
         if (errores) {
             console.log("Resuelve todos los errores");
+            // Habilitar formularios para su corrección
+            habilitarFormularios();
             return
         }
+
+        console.log(`ENVIANDO ${cuerpos_formularios.length} FORMULARIOS AL SERVIDOR`);
+        console.log(cuerpos_formularios);
+        
+        modal.showModal();
 
         // Enviar la información de todos los formularios
         Promise.allSettled(
             cuerpos_formularios.map(cuerpo => enviar("//webd.gilberto.codes/api/json.php", cuerpo))
         )
         .then(respuestas => {
-            respuestass.forEach((respuesta, idx) => {
+            console.log(respuestas);
+            let cont_deshabilitados = 0; // Se utiliza para corregir el desfase de indices causado por deshabilitar los formularios enviados correctamente
+            
+            respuestas.forEach((respuesta, idx) => {
+                console.log(respuesta);
                 if (respuesta.status === "fulfilled") { // Envio completado
-                    // ocultar formulario de la vista o deshabilitar
+                    // ocultar formulario de la vista o deshabilitar 
+                    deshabilitarFormularioEnviado(respuesta.value, idx - cont_deshabilitados);
+                    cont_deshabilitados += 1; 
                 }
                 if (respuesta.status === "rejected") { // Envio rechazado
                     // Mostrar mensaje de errores
-                    respuesta.reason.data
+                    mostrarErroresServidor(respuesta.reason.data, idx - cont_deshabilitados);
                 }
             });
         })
-
+        .finally(() => {
+            console.log("SE HAN RECIBIDO TODAS LAS RESPUESTAS");
+            habilitarFormularios();
+            modal.close();
+        })
     }
+
+    function deshabilitarFormularios() {
+        // Deshabilitar botones de reset
+        let resets = document.querySelectorAll("button[type='reset']");
+        resets.forEach(reset => reset.disabled = true);
+
+        let forms = document.querySelectorAll("form[data-habilitado='true']");
+        forms.forEach(form => {
+            // Deshabilitar campos
+            let inputs = form.querySelectorAll("input");
+            inputs.forEach(input => {
+                input.disabled = true;
+            })
+        })
+    }
+
+    function habilitarFormularios() {
+        // Habilitar botones de reset
+        let resets = document.querySelectorAll("button[type='reset']");
+        resets.forEach(reset => reset.disabled = false);
+
+        let forms = document.querySelectorAll("form[data-habilitado='true']");
+        forms.forEach(form => {
+            // Deshabilitar campos
+            let inputs = form.querySelectorAll("input");
+            inputs.forEach(input => {
+                input.disabled = false;
+            })
+        })
+    }
+
+    function deshabilitarFormularioEnviado(cuerpo, idx) {
+        let forms = document.querySelectorAll("form[data-habilitado='true']");
+        let form = forms[idx];
+        form.dataset.habilitado = false;
+
+        let reset = form.querySelector("button[type='reset']");
+        reset.remove();
+
+        let msg_enviado = form.querySelector("span[name='msg_enviado']");
+        msg_enviado.textContent = `Formulario recibido correctamente`;
+
+        let msg_id = form.querySelector("span[name='id']");
+        msg_id.textContent = `ID: ${cuerpo.id}`;
+    }
+
+    // Muestra los errores del servidor del formulario
+    function mostrarErroresServidor(cuerpo, idx) {
+        // Recupera solo los formularios habilitados
+        let forms = document.querySelectorAll("form[data-habilitado='true']");
+        let form = forms[idx]
+
+        if (cuerpo.nombre.length > 0) {
+            let msg = form.querySelector(`input[name="nombre"]`).nextElementSibling;
+            mostrarMsgError(msg, cuerpo.nombre[0]);
+        }
+
+        if (cuerpo.apellido.length > 0) {
+            let msg = form.querySelector(`input[name="apellido"]`).nextElementSibling;
+            mostrarMsgError(msg, cuerpo.apellido[0]);
+        }
+
+        if (cuerpo.rfc.length > 0) {
+            let msg = form.querySelector(`input[name="rfc"]`).nextElementSibling;
+            mostrarMsgError(msg, cuerpo.rfc[0]);
+        }
+
+        if (cuerpo.direccion.length > 0) {
+            let msg = form.querySelector(`input[name="direccion"]`).nextElementSibling;
+            mostrarMsgError(msg, cuerpo.direccion[0]);
+        }
+
+        if (cuerpo.cp.length > 0) {
+            let msg = form.querySelector(`input[name="cp"]`).nextElementSibling;
+            mostrarMsgError(msg, cuerpo.cp[0]);
+        }
+
+        if (cuerpo.email.length > 0) {
+            let msg = form.querySelector(`input[name="email"]`).nextElementSibling;
+            mostrarMsgError(msg, cuerpo.email[0]);
+        }
+    }
+
+    function mostrarMsgError(element, msg) {
+        limpiarMsg(element);
+        element.innerText = msg;
+        element.classList.add("msg_error");
+    }
+
 
     function cambiarEstadoCampo(event) {
         event.preventDefault();
@@ -102,6 +213,13 @@ onReady.ready(() => {
 
         if (["text", "tel", "email"].includes(element.type)) {
             element.dataset.sucio = (element.value !== "");
+        } else if(element.type === "radio") {
+            // establecer los demas radios del grupo como no sucios
+            for (radio of document.querySelectorAll(`input[type='radio'][data-padre='${element.dataset.padre}']`)) {
+                radio.dataset.sucio = false;
+            }
+            // establecer el radio seleccionado como sucio
+            element.dataset.sucio = true;
         }
 
         validarCampo(element);
@@ -113,6 +231,8 @@ onReady.ready(() => {
              return validarNombre(element);
         } else if (element.name == "apellido") {
              return validarApellido(element);
+        } else if(element.name == "sexo") {
+            return validarSexo(element);
         } else if (element.name == "rfc") {
              return validarRfc(element);
         } else if (element.name == "direccion") {
@@ -160,6 +280,23 @@ onReady.ready(() => {
         msg_apellido.classList.add("msg_ok");
         let valor = input_element.value.trim();
         return { valido: true, valor: valor };
+    }
+
+    function validarSexo(input_element) {
+        let msg_sexo = document.querySelector(`span[data-target="${input_element.dataset.padre}"]`)
+        limpiarMsg(msg_sexo);
+
+        for (radio of document.querySelectorAll(`input[type="radio"][data-padre="${input_element.dataset.padre}"]`)) {
+            if (radio.checked) {
+                msg_sexo.innerText = "ok";
+                msg_sexo.classList.add("msg_ok");
+                return { valido: true, valor: radio.value };
+            }
+        }
+
+        msg_sexo.innerText = "Selecciona una opción";
+        msg_sexo.classList.add("msg_error");
+        return { valido: false, valor: "" };
     }
 
     function validarRfc(input_element) {
@@ -219,6 +356,7 @@ onReady.ready(() => {
 
         // Valida que el campo cp no este vacio
         if(input_element.dataset.pristino === "true" || input_element.dataset.sucio === "false") {
+            input_element.dataset.corregido = false;
             msg_cp.innerText = "Debes ingresar tu código postal";
             msg_cp.classList.add("msg_error");
             return { valido: false, valor: "" };
@@ -228,6 +366,7 @@ onReady.ready(() => {
         let re_cp = /^[0-9]{5}$/;
         let valor = input_element.value.trim();
         if (re_cp.test(valor) === false) {
+            input_element.dataset.corregido = false;
             msg_cp.innerText = "El CP debe estar formado por 5 digitos";
             msg_cp.classList.add("msg_error");
             return { valido: false, valor: "" }; 
@@ -335,6 +474,7 @@ onReady.ready(() => {
         // form
         let form = document.createElement("form");
         form.setAttribute("id", `form${cont_form}`);
+        form.dataset.habilitado = true;
         div_form_card.appendChild(form);
 
         // seccion información personal
@@ -391,6 +531,61 @@ onReady.ready(() => {
         span_apellido.dataset.target = `apellido${cont_form}`;
         div_apellido.appendChild(span_apellido);
 
+        // div sexo
+        let div_sexo = document.createElement("div");
+        seccion_personal.appendChild(div_sexo);
+
+        // fieldset sexo
+        let fieldset_sexo = document.createElement("fieldset");
+        fieldset_sexo.setAttribute("id", `fieldset${cont_form}`);
+        div_sexo.appendChild(fieldset_sexo);
+
+        // legend sexo
+        let legend_sexo = document.createElement("legend");
+        legend_sexo.innerText = "Sexo";
+        fieldset_sexo.appendChild(legend_sexo);
+
+        // input sexo > masculino
+        let input_sexo_masculino = document.createElement("input");
+        input_sexo_masculino.setAttribute("type", "radio");
+        input_sexo_masculino.setAttribute("name", "sexo");
+        input_sexo_masculino.setAttribute("id", `sexo_masculino${cont_form}`);
+        input_sexo_masculino.setAttribute("value", "masculino");
+        input_sexo_masculino.dataset.pristino = true;
+        input_sexo_masculino.dataset.sucio = false;
+        input_sexo_masculino.dataset.padre = `fieldset${cont_form}`;
+        input_sexo_masculino.addEventListener('change', cambiarEstadoCampo);
+        fieldset_sexo.appendChild(input_sexo_masculino);
+
+        // label sexo > masculino
+        let label_sexo_masculino = document.createElement("label");
+        label_sexo_masculino.innerText = "Masculino";
+        label_sexo_masculino.setAttribute("for", `sexo_masculino${cont_form}`);
+        fieldset_sexo.appendChild(label_sexo_masculino);
+
+        // input sexo > femenino
+        let input_sexo_femenino = document.createElement("input");
+        input_sexo_femenino.setAttribute("type", "radio");
+        input_sexo_femenino.setAttribute("name", "sexo");
+        input_sexo_femenino.setAttribute("id", `sexo_femenino${cont_form}`);
+        input_sexo_femenino.setAttribute("value", "femenino");
+        input_sexo_femenino.dataset.pristino = true;
+        input_sexo_femenino.dataset.sucio = false;
+        input_sexo_femenino.dataset.padre = `fieldset${cont_form}`;
+        input_sexo_femenino.addEventListener('change', cambiarEstadoCampo);
+        fieldset_sexo.appendChild(input_sexo_femenino);
+
+        // label sexo > femenino
+        let label_sexo_femenino = document.createElement("label");
+        label_sexo_femenino.innerText = "Femenino";
+        label_sexo_femenino.setAttribute("for", `sexo_femenino${cont_form}`);
+        fieldset_sexo.appendChild(label_sexo_femenino);
+
+        // span sexo
+        let span_sexo = document.createElement("span");
+        span_sexo.dataset.target = `fieldset${cont_form}`;
+        fieldset_sexo.appendChild(span_sexo);
+
         // div RFC 
         let div_rfc = document.createElement("div");
         seccion_personal.appendChild(div_rfc);
@@ -415,6 +610,12 @@ onReady.ready(() => {
         let span_rfc = document.createElement("span");
         span_rfc.dataset.target = `rfc${cont_form}`;
         div_rfc.appendChild(span_rfc);
+
+        // div curp
+        // TODO
+
+        // div intereses
+        // TODO
 
         // seccion direcion 
         let seccion_direccion= document.createElement("seccion");
@@ -532,6 +733,14 @@ onReady.ready(() => {
         btn_reset.dataset.target = `form${cont_form}`;
         btn_reset.addEventListener('click', resetFormulario);
         seccion_botones.appendChild(btn_reset);
+
+        let span_enviado = document.createElement("span");
+        span_enviado.setAttribute("name", `msg_enviado`);
+        seccion_botones.appendChild(span_enviado);
+
+        let span_id = document.createElement("span");
+        span_id.setAttribute("name", `id`);
+        seccion_botones.appendChild(span_id);
 
         cont_form++;
     }

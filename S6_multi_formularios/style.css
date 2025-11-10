@@ -64,3 +64,8 @@ nav button, button[type='reset'] {
     border-radius: 8px;
     font-size: 1.1em;
 }
+
+dialog {
+    border: none;
+    background-color: transparent;
+}
