@@ -387,7 +387,7 @@ onReady.ready(() => {
 
         // Valida que haya algun elemento seleccionado
         if (cont_seleccionados === 0) {
-            msg_intereses.innerText = "Debes seleccionar al menos 2 elemento";
+            msg_intereses.innerText = "Debes seleccionar al menos 2 elementos";
             msg_intereses.classList.add("msg_error");
             return { valido: false, valor: [] };
         }
