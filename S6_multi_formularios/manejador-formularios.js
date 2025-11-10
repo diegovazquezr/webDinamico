@@ -237,6 +237,8 @@ onReady.ready(() => {
             return validarSexo(element);
         } else if (element.name == "rfc") {
              return validarRfc(element);
+        } else if (element.name == "curp") {
+             return validarCurp(element);
         } else if(element.name == "intereses") {
             return validarIntereses(element);
         } else if (element.name == "direccion") {
@@ -333,6 +335,39 @@ onReady.ready(() => {
         // El rfc es válido
         msg_rfc.innerText = "ok";
         msg_rfc.classList.add("msg_ok");
+        return { valido: true, valor: valor };
+    }
+
+    function validarCurp(input_element) {
+        let msg_curp = document.querySelector(`span[data-target="${input_element.id}"]`)
+        limpiarMsg(msg_curp);
+
+        // Valida que el campo curp no este vacio
+        if(input_element.dataset.pristino === "true" || input_element.dataset.sucio === "false") {
+            msg_curp.innerText = "Debes ingresar tu CURP";
+            msg_curp.classList.add("msg_error");
+            return { valido: false, valor: "" };
+        }
+
+        // Valida la longitud de la curp
+        let valor = input_element.value.trim().toUpperCase();
+        if (valor.length != 18) {
+            msg_curp.innerText = "La CURP debe tener 18 caracteres";
+            msg_curp.classList.add("msg_error");
+            return { valido: false, valor: ""};
+        }
+        
+        // Valida que tenga una estructura correcta
+        let reCurp = /^[A-Z]{1}[AEIOUX]{1}[A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HM]{1}(AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]{1}\d{1}$/;
+        if (reCurp.test(valor) === false) {
+            msg_curp.innerText = "Debes ingresar una CURP válida";
+            msg_curp.classList.add("msg_error");
+            return { valido: false, valor: ""};
+        }
+
+        // El curp es válido
+        msg_curp.innerText = "ok";
+        msg_curp.classList.add("msg_ok");
         return { valido: true, valor: valor };
     }
 
@@ -650,7 +685,29 @@ onReady.ready(() => {
         div_rfc.appendChild(span_rfc);
 
         // div curp
-        // TODO
+        let div_curp = document.createElement("div");
+        seccion_personal.appendChild(div_curp);
+
+        // label curp
+        let label_curp = document.createElement("label");
+        label_curp.innerText = "CURP";
+        label_curp.setAttribute("for", `curp${cont_form}`);
+        div_curp.appendChild(label_curp);
+
+        // input curp
+        let input_curp = document.createElement("input");
+        input_curp.setAttribute("type", "text");
+        input_curp.setAttribute("id", `curp${cont_form}`);
+        input_curp.setAttribute("name", `curp`);
+        input_curp.dataset.pristino = true;
+        input_curp.dataset.sucio = false;
+        input_curp.addEventListener('change', cambiarEstadoCampo);
+        div_curp.appendChild(input_curp);
+
+        // span curp
+        let span_curp = document.createElement("span");
+        span_curp.dataset.target = `curp${cont_form}`;
+        div_curp.appendChild(span_curp);
 
         // div intereses
         let div_intereses = document.createElement("div");
